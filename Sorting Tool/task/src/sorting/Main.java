@@ -20,15 +20,18 @@ public class Main {
     public static void main(final String[] args) {
         argType argument;
 
-        try {
-            argument = argType.valueOf(args[0].toUpperCase());
-        } catch (ArrayIndexOutOfBoundsException notSort) {
-            try {
-                argument = argType.valueOf(args[1].toUpperCase());
-            } catch (ArrayIndexOutOfBoundsException error) {
-                argument = argType.WORD;
-            }
+        argument = argType.valueOf(args[0].toUpperCase());
+
+        if ("-sortIntegers".equals(argument.name())) {
+            Sorting.sortInts();
         }
+
+        try {
+            argument = argType.valueOf(args[1].toUpperCase());
+        } catch (ArrayIndexOutOfBoundsException error) {
+            argument = argType.WORD;
+        }
+
 
         switch (argument) {
             case LONG:
