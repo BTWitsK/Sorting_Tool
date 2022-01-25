@@ -5,8 +5,7 @@ import java.util.*;
 enum argType {
     LONG("long"),
     LINE("line"),
-    WORD("word"),
-    SORT("-sortIntegers");
+    WORD("word");
 
     argType(String param) {
         this.param = param;
@@ -19,34 +18,30 @@ public class Main {
 
     public static void main(final String[] args) {
         argType argument;
+        List<String> arguments = Arrays.asList(args);
 
-        argument = argType.valueOf(args[0].toUpperCase());
-
-        if ("-sortIntegers".equals(argument.name())) {
+        if (arguments.contains("-sortIntegers")) {
             Sorting.sortInts();
-        }
+        } else {
+            try {
+                argument = argType.valueOf(args[1].toUpperCase());
+            } catch (ArrayIndexOutOfBoundsException error) {
+                argument = argType.WORD;
+            }
 
-        try {
-            argument = argType.valueOf(args[1].toUpperCase());
-        } catch (ArrayIndexOutOfBoundsException error) {
-            argument = argType.WORD;
-        }
-
-
-        switch (argument) {
-            case LONG:
-                Count.longCount();
-                break;
-            case LINE:
-                Count.lineCount();
-                break;
-            case WORD:
-                Count.wordCount();
-                break;
-            case SORT:
-                Sorting.sortIntList();
-            default:
-                break;
+            switch (argument) {
+                case LONG:
+                    Count.longCount();
+                    break;
+                case LINE:
+                    Count.lineCount();
+                    break;
+                case WORD:
+                    Count.wordCount();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

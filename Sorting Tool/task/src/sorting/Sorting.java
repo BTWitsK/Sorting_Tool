@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Sorting {
 
-    public static void sortIntList() {
+    public static void sortInts() {
         Scanner scanner = new Scanner(System.in);
         List<Integer> intList = new ArrayList<>();
         while (scanner.hasNextInt()) {
@@ -31,8 +31,13 @@ public class Sorting {
         int[] left = new int[middle];
         int[] right = new int[size - middle];
 
-        System.arraycopy(unsortedArray, 0, left, 0, middle);
-        System.arraycopy(unsortedArray, middle, right, middle, size);
+        for (int i = 0; i < middle; i++) {
+            left[i] = unsortedArray[i];
+        }
+
+        for (int i = middle; i < size; i++) {
+            right[i - middle] = unsortedArray[i];
+        }
 
         mergeSort(left, left.length);
         mergeSort(right, right.length);
