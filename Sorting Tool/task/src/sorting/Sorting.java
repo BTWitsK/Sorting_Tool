@@ -24,7 +24,7 @@ public class Sorting {
     public static void mergeSort(int[] unsortedArray, int size) {
 
         if (size < 2) {
-            return ;
+            return;
         }
 
         int middle = size / 2;
