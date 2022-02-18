@@ -40,20 +40,32 @@ public class Main {
         sortingType sort;
         HashMap<String, String> arguments = parseArgs(args);
 
-        sort = arguments.containsKey("-sortingType") ? sortingType.valueOf(arguments.get("-sortingType"))
+        sort = arguments.containsKey("-sortingType") ? sortingType.valueOf(arguments.get("-sortingType").toUpperCase())
                 : sortingType.NATURAL;
 
-        data = dataType.valueOf(arguments.get("-dataType"));
+        data = dataType.valueOf(arguments.get("-dataType").toUpperCase());
 
         switch (data) {
             case LONG:
-                Count.longCount();
+                if (sort.param.equals("natural")) {
+                    Sorting.naturalLongSort();
+                } else {
+                    Sorting.countSort("numbers");
+                }
                 break;
             case LINE:
-                Count.lineCount();
+                if (sort.param.equals("natural")) {
+                    Sorting.naturalLineSort();
+                } else {
+                    Sorting.countLineSort("lines");
+                }
                 break;
             case WORD:
-                Count.wordCount();
+                if (sort.param.equals("natural")) {
+                    Sorting.naturalWordSort();
+                } else {
+                    Sorting.countWordSort("words");
+                }
                 break;
             default:
                 break;
