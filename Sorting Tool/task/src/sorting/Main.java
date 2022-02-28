@@ -1,28 +1,6 @@
 package sorting;
 import java.util.*;
 
-enum dataType {
-    LONG("long"),
-    LINE("line"),
-    WORD("word");
-
-    dataType(String param) {
-        this.param = param;
-    }
-
-    String param;
-}
-
-enum sortingType {
-    NATURAL("natural"),
-    BYCOUNT("byCount");
-
-    sortingType(String param) {
-        this.param = param;
-    }
-
-    String param;
-}
 
 public class Main {
 
@@ -36,16 +14,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        dataType data;
-        sortingType sort;
         HashMap<String, String> arguments = parseArgs(args);
+        Sorter sorter = new Sorter(arguments);
 
-        sort = arguments.containsKey("-sortingType") ? sortingType.valueOf(arguments.get("-sortingType").toUpperCase())
-                : sortingType.NATURAL;
-
-        data = dataType.valueOf(arguments.get("-dataType").toUpperCase());
-
-        switch (data) {
+        switch (sorter.getDataType()) {
             case LONG:
                 if (sort.param.equals("natural")) {
                     Sorting.naturalLongSort();
