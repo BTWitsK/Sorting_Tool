@@ -24,21 +24,22 @@ enum sortingType {
 
 public class Sorter {
     static Scanner scanner = new Scanner(System.in);
-    private dataType data;
-    sortingType sort;
+    private final dataType data;
+    private final sortingType sort;
     SortedMap<Number, Integer> numberMap = new TreeMap<>();
     SortedMap<String, Integer> wordMap = new TreeMap<>();
     List<Number> numberList;
+    private int totalValues;
 
     public Sorter(HashMap <String, String> args) {
-        this.data = dataType.valueOf(args.get("-dataType").toUpperCase());
-        this.sort = args.containsKey("-sortingType") ? sortingType.valueOf(args.get("-sortingType").toUpperCase())
-                        : sortingType.NATURAL;
+        this.data = dataType.valueOf(args.getOrDefault("-dataType","word").toUpperCase());
+        this.sort = sortingType.valueOf(args.getOrDefault("-sortingType", "natural").toUpperCase());
+
         switch (this.sort) {
             case BYCOUNT -> {
                 switch (this.data) {
-                    case LONG -> setMap(this.numberMap);
-                    case LINE, WORD -> setMap(this.wordMap, 0);
+                    case LONG -> this.totalValues = setMap(this.numberMap);
+                    case LINE, WORD -> this.totalValues = setMap(this.wordMap, 0);
                 }
             }
             case NATURAL -> {
@@ -63,7 +64,8 @@ public class Sorter {
         return list;
     }
 
-    public void setMap(SortedMap<String, Integer> map, int num) {
+    public int setMap(SortedMap<String, Integer> map, int num) {
+        int total = 0;
         while (scanner.hasNext()) {
             if (data.name().equals("LINE")) {
                 map.merge(scanner.nextLine(), 1, Integer::sum);
@@ -71,16 +73,26 @@ public class Sorter {
                 map.merge(scanner.next(), 1, Integer::sum);
             }
         }
+        for (int value : map.values()) {
+            total += value;
+        }
+        return total;
     }
 
-    public void setMap(SortedMap<Number, Integer> map) {
+    public int setMap(SortedMap<Number, Integer> map) {
+        int total = 0;
         while (scanner.hasNext()) {
-            if (data.name().equals("LINE")) {
-                map.merge(new Number(scanner.nextLine()), 1, Integer::sum);
-            } else {
-                map.merge(new Number(scanner.next()), 1, Integer::sum);
+            try {
+                long num = Long.parseLong(scanner.next());
+                map.merge(new Number(String.valueOf(num)), 1, Integer::sum);
+            } catch (NumberFormatException e) {
+                System.out.println("\"%s\" is not a long. It will be skipped.\n");
             }
         }
+        for (int value : map.values()) {
+            total += value;
+        }
+        return total;
     }
 
     public String outputByCount(List<Map.Entry<String, Integer>> outputList, int total) {
@@ -107,32 +119,21 @@ public class Sorter {
     @Override
     public String toString() {
         StringBuilder formattedString = new StringBuilder();
-        int total = 0;
         String output = switch (this.data) {
             case LONG -> "numbers";
             case LINE -> "lines";
             case WORD -> "words";
         };
-
         formattedString.append(String.format("Total %s: ", output));
 
         switch (this.sort) {
             case BYCOUNT -> {
+                formattedString.append(String.format("%d.\n", this.totalValues));
                 switch (this.data) {
-                    case LINE, WORD -> {
-                        for (int value : wordMap.values()) {
-                            total += value;
-                        }
-                        formattedString.append(String.format("%d.\n", total));
-                        formattedString.append(outputByCount(new ArrayList<>(wordMap.entrySet()), total));
-                    }
-                    case LONG -> {
-                        for (int value : numberMap.values()) {
-                            total += value;
-                        }
-                        formattedString.append(String.format("%d.\n", total));
-                        formattedString.append(outputByCount(total, new ArrayList<>(numberMap.entrySet())));
-                    }
+                    case LINE, WORD ->
+                        formattedString.append(outputByCount(new ArrayList<>(wordMap.entrySet()), this.totalValues));
+                    case LONG ->
+                        formattedString.append(outputByCount(this.totalValues, new ArrayList<>(numberMap.entrySet())));
                 }
             }
             case NATURAL -> {
