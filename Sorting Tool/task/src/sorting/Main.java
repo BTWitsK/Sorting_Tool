@@ -17,31 +17,8 @@ public class Main {
         HashMap<String, String> arguments = parseArgs(args);
         Sorter sorter = new Sorter(arguments);
 
-        switch (sorter.getDataType()) {
-            case LONG:
-                if (sort.param.equals("natural")) {
-                    Sorting.naturalLongSort();
-                } else {
-                    Sorting.countSort("numbers");
-                }
-                break;
-            case LINE:
-                if (sort.param.equals("natural")) {
-                    Sorting.naturalLineSort();
-                } else {
-                    Sorting.countLineSort("lines");
-                }
-                break;
-            case WORD:
-                if (sort.param.equals("natural")) {
-                    Sorting.naturalWordSort();
-                } else {
-                    Sorting.countWordSort("words");
-                }
-                break;
-            default:
-                break;
-        }
+        System.out.println(sorter);
+
 
     }
 }

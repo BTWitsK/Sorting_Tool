@@ -9,7 +9,7 @@ enum dataType {
     dataType(String param) {
         this.param = param;
     }
-    String param;
+    final String param;
 }
 
 enum sortingType {
@@ -19,30 +19,36 @@ enum sortingType {
     sortingType(String param) {
         this.param = param;
     }
-    String param;
+    final String param;
 }
 
 public class Sorter {
     static Scanner scanner = new Scanner(System.in);
     private dataType data;
     sortingType sort;
-    SortedMap<Number, Integer> numberMap;
-    SortedMap<String, Integer> wordMap;
+    SortedMap<Number, Integer> numberMap = new TreeMap<>();
+    SortedMap<String, Integer> wordMap = new TreeMap<>();
     List<Number> numberList;
 
     public Sorter(HashMap <String, String> args) {
         this.data = dataType.valueOf(args.get("-dataType").toUpperCase());
         this.sort = args.containsKey("-sortingType") ? sortingType.valueOf(args.get("-sortingType").toUpperCase())
                         : sortingType.NATURAL;
-
-        if (sort.name().equals("BYCOUNT")) {
-            this.numberMap = setMap();
+        switch (this.sort) {
+            case BYCOUNT -> {
+                switch (this.data) {
+                    case LONG -> setMap(this.numberMap);
+                    case LINE, WORD -> setMap(this.wordMap, 0);
+                }
+            }
+            case NATURAL -> {
+                this.numberList = setList(this.data);
+                switch (this.data) {
+                    case LONG -> numberList.sort(Comparator.comparing(Number::getIntVal));
+                    case LINE, WORD -> numberList.sort(Comparator.comparing(Number::getStringVal));
+                }
+            }
         }
-        this.numberList = setList(data);
-    }
-
-    public dataType getDataType() {
-        return this.data;
     }
 
     public List<Number> setList(dataType data) {
@@ -57,8 +63,17 @@ public class Sorter {
         return list;
     }
 
-    public SortedMap<Number, Integer> setMap() {
-       SortedMap<Number, Integer> map = new TreeMap<>();
+    public void setMap(SortedMap<String, Integer> map, int num) {
+        while (scanner.hasNext()) {
+            if (data.name().equals("LINE")) {
+                map.merge(scanner.nextLine(), 1, Integer::sum);
+            } else {
+                map.merge(scanner.next(), 1, Integer::sum);
+            }
+        }
+    }
+
+    public void setMap(SortedMap<Number, Integer> map) {
         while (scanner.hasNext()) {
             if (data.name().equals("LINE")) {
                 map.merge(new Number(scanner.nextLine()), 1, Integer::sum);
@@ -66,26 +81,27 @@ public class Sorter {
                 map.merge(new Number(scanner.next()), 1, Integer::sum);
             }
         }
-       return map;
     }
 
-    public void sortByCount() {
-        switch (this.data) {
-            case WORD, LINE:
-                numberMap.forEach((x,y) -> wordMap.put(x.getStringVal(), y));
-                break;
+    public String outputByCount(List<Map.Entry<String, Integer>> outputList, int total) {
+        StringBuilder output = new StringBuilder();
+        outputList.sort(Map.Entry.comparingByValue());
+        for (var entry : outputList) {
+            double percent = (double) entry.getValue() / total * 100;
+            output.append(String.format("%s: %d times(s), %.0f%%\n", entry.getKey(), entry.getValue(), percent));
         }
+        return output.toString();
     }
 
-    public void sortNaturally() {
-        switch (this.data) {
-            case LONG:
-                numberList.sort(Comparator.comparing(Number::getIntVal));
-                break;
-            case WORD, LINE:
-                numberList.sort(Comparator.comparing(Number::getStringVal));
-                break;
+    public String outputByCount(int total, List<Map.Entry<Number, Integer>> outputList){
+        StringBuilder output = new StringBuilder();
+        outputList.sort(Map.Entry.comparingByValue());
+        for (var entry : outputList) {
+            double percent = (double) entry.getValue() / total * 100;
+            output.append(String.format("%d: %d times(s), %.0f%%\n",
+                    entry.getKey().getIntVal(), entry.getValue(), percent));
         }
+        return output.toString();
     }
 
     @Override
@@ -101,39 +117,32 @@ public class Sorter {
         formattedString.append(String.format("Total %s: ", output));
 
         switch (this.sort) {
-            case BYCOUNT:
-                for (int value : numberMap.values()) {
-                    total += value;
+            case BYCOUNT -> {
+                switch (this.data) {
+                    case LINE, WORD -> {
+                        for (int value : wordMap.values()) {
+                            total += value;
+                        }
+                        formattedString.append(String.format("%d.\n", total));
+                        formattedString.append(outputByCount(new ArrayList<>(wordMap.entrySet()), total));
+                    }
+                    case LONG -> {
+                        for (int value : numberMap.values()) {
+                            total += value;
+                        }
+                        formattedString.append(String.format("%d.\n", total));
+                        formattedString.append(outputByCount(total, new ArrayList<>(numberMap.entrySet())));
+                    }
                 }
-                formattedString.append(String.format("%d.\n", total));
-
-                if (!this.data.name().equals("LONG")) {
-                    List<Map.Entry<String, Integer>> outputList = new ArrayList<>(wordMap.entrySet());
-                }
-
-
-                List<Map.Entry<Number, Integer>> outputList = new ArrayList<>(numberMap.entrySet());
-
-
-                for (var entry : outputList) {
-                    double percent = (double) entry.getValue() / total * 100;
-                    System.out.printf("%s: %d times(s), %.0f%%\n"
-                            , entry.getKey(), entry.getValue(), percent);
-                }
-                break;
-            case NATURAL:
+            }
+            case NATURAL -> {
                 formattedString.append(String.format("%d.\nSorted data: ", numberList.size()));
                 switch (this.data) {
-                    case LINE:
-                        numberList.forEach(line -> formattedString.append(line).append("\n"));
-                        break;
-                    default:
-                        numberList.forEach(number -> formattedString.append(number).append(" "));
-                        break;
+                    case LINE -> numberList.forEach(line -> formattedString.append(line).append("\n"));
+                    case LONG, WORD -> numberList.forEach(number -> formattedString.append(number.getIntVal()).append(" "));
                 }
-                break;
+            }
         }
         return formattedString.toString();
     }
 }
-
