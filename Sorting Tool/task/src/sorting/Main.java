@@ -1,10 +1,20 @@
 package sorting;
+import java.io.*;
 import java.util.*;
 
 public class Main {
     public static HashMap<String, String> parseArgs(String[] args) {
         HashMap<String, String> arguments = new HashMap<>();
+        HashMap<String, String> ioInfo = new HashMap<>();
         List<String> argumentList = new ArrayList<>(Arrays.asList(args));
+
+        if (argumentList.contains("-inputFile")) {
+            ioInfo.put("-inputFile", argumentList.get(argumentList.indexOf("-inputFile") + 1));
+        }
+
+        if (argumentList.contains("-outputFile")) {
+            ioInfo.put("-outputFile", argumentList.get(argumentList.indexOf("-outputFile") + 1));
+        }
         List<String> invalidArguments = new ArrayList<>(argumentList);
         List<String> validArguments = new ArrayList<>
                 (Arrays.asList("-sortingType", "-dataType", "long", "line", "word", "natural", "byCount"));
@@ -28,15 +38,28 @@ public class Main {
                 arguments.put(formatArgs[i++], formatArgs[i]);
             }
         }
+        arguments.putAll(ioInfo);
         return arguments;
     }
 
     public static void main(String[] args) {
         HashMap<String, String> arguments = parseArgs(args);
-        Sorter sorter = new Sorter(arguments);
 
-        System.out.println(sorter);
-
-
+        if (arguments.containsKey("-outputFile")) {
+            try {
+                PrintWriter printWriter = new PrintWriter((arguments.get("-outputFile")));
+                Sorter sorter = new Sorter(arguments);
+                printWriter.print(sorter);
+            } catch (FileNotFoundException e) {
+                System.out.print("No file found");
+            }
+        } else {
+            try {
+                Sorter sorter = new Sorter(arguments);
+                System.out.println(sorter);
+            } catch (FileNotFoundException error) {
+                System.out.println("File not found");
+            }
+        }
     }
 }

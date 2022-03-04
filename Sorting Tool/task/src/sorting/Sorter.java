@@ -1,5 +1,6 @@
 package sorting;
 import java.util.*;
+import java.io.*;
 
 enum dataType {
     LONG("long"),
@@ -23,7 +24,7 @@ enum sortingType {
 }
 
 public class Sorter {
-    static Scanner scanner = new Scanner(System.in);
+    static Scanner scanner;
     private final dataType data;
     private final sortingType sort;
     SortedMap<Number, Integer> numberMap = new TreeMap<>();
@@ -31,9 +32,10 @@ public class Sorter {
     List<Number> numberList;
     private int totalValues;
 
-    public Sorter(HashMap <String, String> args) {
+    public Sorter(HashMap <String, String> args) throws FileNotFoundException {
         this.data = dataType.valueOf(args.getOrDefault("-dataType","word").toUpperCase());
         this.sort = sortingType.valueOf(args.getOrDefault("-sortingType", "natural").toUpperCase());
+        scanner = setScanner(args);
 
         switch (this.sort) {
             case BYCOUNT -> {
@@ -49,6 +51,14 @@ public class Sorter {
                     case LINE, WORD -> numberList.sort(Comparator.comparing(Number::getStringVal));
                 }
             }
+        }
+    }
+
+    public Scanner setScanner(HashMap <String, String> args) throws FileNotFoundException {
+        if (args.containsKey("-inputFile")) {
+            return new Scanner(new File(args.get("-inputFile")));
+        } else {
+            return new Scanner(System.in);
         }
     }
 
